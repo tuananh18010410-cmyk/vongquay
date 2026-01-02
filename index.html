@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<title>Vòng quay may m?n</title>
+<title>Vong quay may man</title>
 
 <style>
 body {
@@ -37,27 +37,27 @@ canvas {
 
 <body>
 
-<h3>VÒNG QUAY MAY M?N</h3>
+<h3>VONG QUAY MAY MAN</h3>
 
-<input id="phone" placeholder="Nh?p s? di?n tho?i"><br>
+<input id="phone" placeholder="Nhap so dien thoai"><br>
 <button id="spinBtn">QUAY</button>
 
 <div id="pointer"></div>
 <canvas id="wheel" width="300" height="300"></canvas>
 
-<h3 id="result">K?t qu? s? hi?n th? ? dây</h3>
+<h3 id="result">Ket qua se hien thi o day</h3>
 
 <script>
 /* ================== LINK APPS SCRIPT ================== */
 const SHEET_URL = "https://script.google.com/macros/s/AKfycbzZB1zwEvuLJjEd6S95txt_v8_kuxosu0oAZseKcrrrDyMF7G6mqi-TSiArElvXCDhj/exec";
 
-/* ================== PH?N THU?NG ================== */
+/* ================== PHAN THUONG ================== */
 const rewards = [
   "Voucher 500k",
   "Voucher 100k",
   "Voucher 100k",
-  "Móc khóa Jifuko",
-  "Gi?m 5%"
+  "Moc khoa Jifuko",
+  "Giam 5%"
 ];
 
 /* ================== BI?N ================== */
@@ -75,7 +75,7 @@ const sliceAngle = (2 * Math.PI) / rewards.length;
 let currentAngle = 0;
 let isSpinning = false;
 
-/* ================== V? VÒNG ================== */
+/* ================== VE VÒNG ================== */
 function drawWheel(angle) {
   ctx.clearRect(0, 0, size, size);
   ctx.save();
@@ -113,13 +113,13 @@ spinBtn.onclick = () => {
 
   const phone = phoneInput.value.trim();
   if (phone.length < 9) {
-    alert("Nh?p s? di?n tho?i h?p l?");
+    alert("Nhap so dien thoai hop le");
     return;
   }
 
   const usedPhones = JSON.parse(localStorage.getItem("usedPhones") || "[]");
   if (usedPhones.includes(phone)) {
-    alert("S? này dã quay r?i");
+    alert("So nay da quay roi");
     return;
   }
 
@@ -150,7 +150,7 @@ spinBtn.onclick = () => {
       requestAnimationFrame(animate);
     } else {
       const prize = rewards[index];
-      result.innerText = "B?n dã trúng: " + prize;
+      result.innerText = "Ban da trung: " + prize;
 
       usedPhones.push(phone);
       localStorage.setItem("usedPhones", JSON.stringify(usedPhones));
