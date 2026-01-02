@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Vòng quay may m?n</title>
+
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #f4f4f4;
+  text-align: center;
+  padding-top: 20px;
+}
+
+input, button {
+  padding: 10px;
+  font-size: 16px;
+  margin-top: 10px;
+}
+
+#pointer {
+  width: 0;
+  height: 0;
+  border-left: 14px solid transparent;
+  border-right: 14px solid transparent;
+  border-bottom: 26px solid red;
+  margin: 10px auto;
+}
+
+canvas {
+  background: #fff;
+  border-radius: 50%;
+  border: 6px solid #333;
+}
+</style>
+</head>
+
+<body>
+
+<h3>VÒNG QUAY MAY M?N</h3>
+
+<input id="phone" placeholder="Nh?p s? di?n tho?i"><br>
+<button id="spinBtn">QUAY</button>
+
+<div id="pointer"></div>
+<canvas id="wheel" width="300" height="300"></canvas>
+
+<h3 id="result">K?t qu? s? hi?n th? ? dây</h3>
+
+<script>
+/* ================== LINK APPS SCRIPT ================== */
+const SHEET_URL = "https://script.google.com/macros/s/AKfycbzZB1zwEvuLJjEd6S95txt_v8_kuxosu0oAZseKcrrrDyMF7G6mqi-TSiArElvXCDhj/exec";
+
+/* ================== PH?N THU?NG ================== */
+const rewards = [
+  "Voucher 500k",
+  "Voucher 100k",
+  "Voucher 100k",
+  "Móc khóa Jifuko",
+  "Gi?m 5%"
+];
+
+/* ================== BI?N ================== */
+const canvas = document.getElementById("wheel");
+const ctx = canvas.getContext("2d");
+const spinBtn = document.getElementById("spinBtn");
+const result = document.getElementById("result");
+const phoneInput = document.getElementById("phone");
+
+const size = canvas.width;
+const center = size / 2;
+const radius = center;
+const sliceAngle = (2 * Math.PI) / rewards.length;
+
+let currentAngle = 0;
+let isSpinning = false;
+
+/* ================== V? VÒNG ================== */
+function drawWheel(angle) {
+  ctx.clearRect(0, 0, size, size);
+  ctx.save();
+  ctx.translate(center, center);
+  ctx.rotate(angle);
+
+  rewards.forEach((text, i) => {
+    const start = i * sliceAngle;
+    const end = start + sliceAngle;
+
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.arc(0, 0, radius, start, end);
+    ctx.fillStyle = i % 2 === 0 ? "#FFD54F" : "#FFB74D";
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.save();
+    ctx.rotate(start + sliceAngle / 2);
+    ctx.textAlign = "right";
+    ctx.font = "14px Arial";
+    ctx.fillStyle = "#000";
+    ctx.fillText(text, radius - 10, 5);
+    ctx.restore();
+  });
+
+  ctx.restore();
+}
+
+drawWheel(0);
+
+/* ================== QUAY ================== */
+spinBtn.onclick = () => {
+  if (isSpinning) return;
+
+  const phone = phoneInput.value.trim();
+  if (phone.length < 9) {
+    alert("Nh?p s? di?n tho?i h?p l?");
+    return;
+  }
+
+  const usedPhones = JSON.parse(localStorage.getItem("usedPhones") || "[]");
+  if (usedPhones.includes(phone)) {
+    alert("S? này dã quay r?i");
+    return;
+  }
+
+  isSpinning = true;
+  spinBtn.disabled = true;
+  result.innerText = "Ðang quay...";
+
+  const index = Math.floor(Math.random() * rewards.length);
+
+  const targetAngle =
+    6 * 2 * Math.PI -
+    index * sliceAngle -
+    sliceAngle / 2 -
+    Math.PI / 2;
+
+  const startAngle = currentAngle;
+  const startTime = performance.now();
+  const duration = 3000;
+
+  function animate(time) {
+    const progress = Math.min((time - startTime) / duration, 1);
+    const ease = 1 - Math.pow(1 - progress, 3);
+
+    currentAngle = startAngle + ease * (targetAngle - startAngle);
+    drawWheel(currentAngle);
+
+    if (progress < 1) {
+      requestAnimationFrame(animate);
+    } else {
+      const prize = rewards[index];
+      result.innerText = "B?n dã trúng: " + prize;
+
+      usedPhones.push(phone);
+      localStorage.setItem("usedPhones", JSON.stringify(usedPhones));
+
+      fetch(SHEET_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          phone: phone,
+          reward: prize,
+          time: new Date().toLocaleString("vi-VN")
+        })
+      }).catch(() => {});
+
+      isSpinning = false;
+      spinBtn.disabled = false;
+    }
+  }
+
+  requestAnimationFrame(animate);
+};
+</script>
+
+</body>
+</html>
